@@ -1,0 +1,28 @@
+# config port
+server:
+  port: 8080
+  servlet:
+    context-path: /identity
+
+# Config cau hinh database
+spring:
+  datasource:
+    url: ${DBMS_CONNECTION:jdbc:mysql://172.17.0.2:3306/identity_service}
+    driverClassName: "com.mysql.cj.jdbc.Driver"
+    username: ${DBMS_USERNAME:root}
+    password: ${DBMS_PASSWORD:root}
+  # Chi dung jpa duoi day de tu dong tao table User, tuy nhien khi di lam can dua vao 1 script SQL
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+# Secret Key
+jwt:
+  signerKey: "/nvphzRqEgduNfnKy2ztU3XBeojbmK8jzDivxOxLIGnl+D5GfkjyXdLq15xz9af/\n"
+  valid-duration: 3600  # in second
+  refreshable-duration: 360000 # in seconds
+
+# Layer1 - Controller: Quan ly cac mapping, endpoint
+# Layer2 - Service: Xu ly cac logic lien quan toi subdomain
+# Layer3 - Repository: Tang tuong tac truc tiep voi DBMS
