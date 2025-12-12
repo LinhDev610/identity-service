@@ -139,10 +139,10 @@ MIT License
 `docker image push linhdev610/identity-service:0.9.0`
 
 ### Create network:
-`docker network create devteria-network`
+`docker network create duclinh-network`
 ### Show network list:
 `docker network ls`
-### Start MySQL in devteria-network
-`docker run --network devteria-network --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:8.0.43-debian`
-### Run your application in devteria-network
-`docker run --name identity-service --network devteria-network -p 8080:8080 -e DBMS_CONNECTION=jdbc:mysql://mysql:3306/identity_service identity-service:0.9.0`
+### Start MySQL in duclinh-network
+`docker run --network duclinh-network --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:8.0.43-debian`
+### Run your application in duclinh-network
+`docker run --name identity-service --network duclinh-network -p 8080:8080 -e DBMS_CONNECTION=jdbc:mysql://mysql:3306/identity_service identity-service:0.9.0`
