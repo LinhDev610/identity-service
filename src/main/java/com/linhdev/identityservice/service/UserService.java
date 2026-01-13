@@ -17,6 +17,9 @@ public class UserService {
     public User createRequest(UserCreationRequest request) {
         User user = new User();
 
+        if (userRepository.existsByUsername(request.getUsername()))
+            throw new RuntimeException("User existed");
+
         user.setUsername(request.getUsername());
         user.setPassword(request.getPassword());
         user.setFirstName(request.getFirstName());
@@ -31,7 +34,8 @@ public class UserService {
     }
 
     public User getUser(String userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     public User updateUser(String userId, UserUpdateRequest request) {
