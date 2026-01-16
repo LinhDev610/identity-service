@@ -1,0 +1,18 @@
+package com.linhdev.identityservice.mapper;
+
+import com.linhdev.identityservice.dto.request.UserCreationRequest;
+import com.linhdev.identityservice.dto.request.UserUpdateRequest;
+import com.linhdev.identityservice.dto.response.UserResponse;
+import com.linhdev.identityservice.entity.User;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+
+@Mapper(componentModel = "spring")
+public interface UserMapper {
+    User toUser(UserCreationRequest request);
+
+    // @Mapping(source = "field_source", target = "field_target"); -> Map field bên source sang data cho field bên target
+    // @Mapping(target = "field_need_ignore", ignore = true);
+    UserResponse toUserResponse(User user);
+    void updateUser(@MappingTarget User user, UserUpdateRequest request);
+}
