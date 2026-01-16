@@ -1,5 +1,6 @@
 package com.linhdev.identityservice.controller;
 
+import com.linhdev.identityservice.dto.request.ApiResponse;
 import com.linhdev.identityservice.dto.request.UserCreationRequest;
 import com.linhdev.identityservice.dto.request.UserUpdateRequest;
 import com.linhdev.identityservice.entity.User;
@@ -17,8 +18,11 @@ public class UserController {
     private UserService userService;
 
     @PostMapping()
-    User createUser(@RequestBody @Valid UserCreationRequest request) {
-        return userService.createRequest(request);
+    ApiResponse<User> createUser(@RequestBody @Valid UserCreationRequest request) {
+        ApiResponse<User> apiResponse = new ApiResponse<>();
+
+        apiResponse.setResult(userService.createRequest(request));
+        return apiResponse;
     }
 
     @GetMapping()

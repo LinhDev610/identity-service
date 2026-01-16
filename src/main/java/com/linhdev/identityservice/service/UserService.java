@@ -3,6 +3,8 @@ package com.linhdev.identityservice.service;
 import com.linhdev.identityservice.dto.request.UserCreationRequest;
 import com.linhdev.identityservice.dto.request.UserUpdateRequest;
 import com.linhdev.identityservice.entity.User;
+import com.linhdev.identityservice.exception.AppException;
+import com.linhdev.identityservice.exception.ErrorCode;
 import com.linhdev.identityservice.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,7 @@ public class UserService {
         User user = new User();
 
         if (userRepository.existsByUsername(request.getUsername()))
-            throw new RuntimeException("User existed");
+            throw new AppException(ErrorCode.USER_EXISTED);
 
         user.setUsername(request.getUsername());
         user.setPassword(request.getPassword());
