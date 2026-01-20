@@ -1,22 +1,28 @@
 package com.linhdev.identityservice.service;
 
 import com.linhdev.identityservice.dto.request.AuthenticationRequest;
+import com.linhdev.identityservice.dto.request.IntrospectRequest;
 import com.linhdev.identityservice.dto.response.AuthenticationResponse;
+import com.linhdev.identityservice.dto.response.IntrospectResponse;
 import com.linhdev.identityservice.exception.AppException;
 import com.linhdev.identityservice.exception.ErrorCode;
 import com.linhdev.identityservice.repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -29,7 +35,30 @@ public class AuthenticationService {
     UserRepository userRepository;
 
     @NonFinal
-    protected static final String SIGNER_KEY = "d31e4b1464c3bf21004d646c0fb74021eb9d3e0c0aab23fb9034528663a0c029";
+    @Value("${jwt.signerKey}")
+    protected String SIGNER_KEY;
+
+    public IntrospectResponse introspect(IntrospectRequest request)
+            throws JOSEException, ParseException {
+        // Lấy token từ request
+        String token = request.getToken();
+
+        // Parse token thành object JWT
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        // JWSVerifier → object dùng để KIỂM TRA CHỮ KÝ của JWT
+        // MACVerifier → dùng cho HMAC (HS256, HS512)
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        // verify chữ ký token
+        boolean verified = signedJWT.verify(verifier);
+
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        return IntrospectResponse.builder()
+                .valid(verified && expiryTime.after(new Date()))
+                .build();
+    }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
