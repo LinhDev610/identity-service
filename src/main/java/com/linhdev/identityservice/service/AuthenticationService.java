@@ -4,6 +4,7 @@ import com.linhdev.identityservice.dto.request.AuthenticationRequest;
 import com.linhdev.identityservice.dto.request.IntrospectRequest;
 import com.linhdev.identityservice.dto.response.AuthenticationResponse;
 import com.linhdev.identityservice.dto.response.IntrospectResponse;
+import com.linhdev.identityservice.entity.User;
 import com.linhdev.identityservice.exception.AppException;
 import com.linhdev.identityservice.exception.ErrorCode;
 import com.linhdev.identityservice.repository.UserRepository;
@@ -21,11 +22,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.StringJoiner;
 
 @Slf4j
 @Service
@@ -69,24 +72,24 @@ public class AuthenticationService {
         if (!authenticated)
             throw new AppException(ErrorCode.UNAUTHENTICATED);
 
-        var token = generateToken(user.getUsername());
+        var token = generateToken(user);
         return AuthenticationResponse.builder()
                 .token(token)
                 .authenticated(true)
                 .build();
     }
 
-    private String generateToken(String username) {
+    private String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(username)  // User đăng nhập
+                .subject(user.getUsername())  // User đăng nhập
                 .issuer("linhdev")  // issue từ ai
                 .issueTime(new Date())   // Thời gian tạo
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
                 ))  // Thời gian hết hạn
-                .claim("customClaim", "Custom") // claim tùy chỉnh
+                .claim("scope", buildScope(user)) // claim tùy chỉnh
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -100,5 +103,13 @@ public class AuthenticationService {
             log.error("Can't create token", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private String buildScope(User user) {
+        StringJoiner scopes = new StringJoiner(" ");
+        if (!CollectionUtils.isEmpty(user.getRoles()))
+            user.getRoles().forEach(scopes::add);
+
+        return scopes.toString();
     }
 }
