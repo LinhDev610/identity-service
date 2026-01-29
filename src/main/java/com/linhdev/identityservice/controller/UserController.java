@@ -35,6 +35,7 @@ public class UserController {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         log.info("Username: {}", authentication.getName());
+        // FOR_DEBUG
         authentication.getAuthorities().forEach(
                 grantedAuthority -> log.info(grantedAuthority.getAuthority()));
 

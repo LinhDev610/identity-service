@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated());
 
         // httpSecurity.oauth2ResourceServer -> Đăng ký 1 Authentication Provider để support cho JWT
+        // 1. filter trích xuất Bearer token từ header
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 // oauth2.jwt -> config cho jwt
                 // Nếu cấu hình với 1 resource server bên thứ 3, sử dụng jwtConfigurer.jwkSetUri -> done
@@ -58,14 +59,17 @@ public class SecurityConfig {
 
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
+        // 3. Chuyển Jwt -> collection GrantedAuthority
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
 
+        // 4. Chuyển Jwt -> JwtAuthenticationToken
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
     }
 
+    // 2. Decode + verify token -> return Jwt (claims)
     @Bean
     JwtDecoder jwtDecoder() {
         SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");

@@ -5,6 +5,7 @@ import com.linhdev.identityservice.dto.request.UserUpdateRequest;
 import com.linhdev.identityservice.dto.response.UserResponse;
 import com.linhdev.identityservice.entity.User;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
@@ -16,5 +17,6 @@ public interface UserMapper {
     // @Mapping(target = "field_need_ignore", ignore = true);
     UserResponse toUserResponse(User user);
 
+    @Mapping(target = "roles", ignore = true)
     void updateUser(@MappingTarget User user, UserUpdateRequest request);
 }
