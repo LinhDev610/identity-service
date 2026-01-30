@@ -2,11 +2,14 @@ package com.linhdev.identityservice.service;
 
 import com.linhdev.identityservice.dto.request.AuthenticationRequest;
 import com.linhdev.identityservice.dto.request.IntrospectRequest;
+import com.linhdev.identityservice.dto.request.LogoutRequest;
 import com.linhdev.identityservice.dto.response.AuthenticationResponse;
 import com.linhdev.identityservice.dto.response.IntrospectResponse;
+import com.linhdev.identityservice.entity.InvalidatedToken;
 import com.linhdev.identityservice.entity.User;
 import com.linhdev.identityservice.exception.AppException;
 import com.linhdev.identityservice.exception.ErrorCode;
+import com.linhdev.identityservice.repository.InvalidatedTokenRepository;
 import com.linhdev.identityservice.repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -29,6 +32,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -36,6 +40,7 @@ import java.util.StringJoiner;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationService {
     UserRepository userRepository;
+    InvalidatedTokenRepository invalidatedTokenRepository;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -45,21 +50,16 @@ public class AuthenticationService {
             throws JOSEException, ParseException {
         // Lấy token từ request
         String token = request.getToken();
+        boolean isValid = true;
 
-        // Parse token thành object JWT
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        // JWSVerifier → object dùng để KIỂM TRA CHỮ KÝ của JWT
-        // MACVerifier → dùng cho HMAC (HS256, HS512)
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-
-        // verify chữ ký token
-        boolean verified = signedJWT.verify(verifier);
-
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        try {
+            verifyToken(token);
+        } catch (AppException e) {
+            isValid = false;
+        }
 
         return IntrospectResponse.builder()
-                .valid(verified && expiryTime.after(new Date()))
+                .valid(isValid)
                 .build();
     }
 
@@ -79,6 +79,43 @@ public class AuthenticationService {
                 .build();
     }
 
+    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+        var signToken = verifyToken(request.getToken());
+
+        String jit = signToken.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jit)
+                .expiryTime(expiryTime)
+                .build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+    }
+
+    private SignedJWT verifyToken(String token) throws ParseException, JOSEException {
+        // Parse token thành object JWT
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        // JWSVerifier → object dùng để KIỂM TRA CHỮ KÝ của JWT
+        // MACVerifier → dùng cho HMAC (HS256, HS512)
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        // verify chữ ký token
+        boolean verified = signedJWT.verify(verifier);
+
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        if (!(verified && expiryTime.after(new Date())))
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        if (invalidatedTokenRepository
+                .existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        return signedJWT;
+    }
+
     private String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
@@ -89,6 +126,7 @@ public class AuthenticationService {
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
                 ))  // Thời gian hết hạn
+                .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user)) // claim tùy chỉnh
                 .build();
 
