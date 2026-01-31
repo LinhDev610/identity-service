@@ -24,6 +24,7 @@ public class SecurityConfig {
             "/auth/token",
             "/auth/introspect",
             "/auth/logout",
+            "/auth/refresh",
     };
 
     // 2. Decode + verify token -> return Jwt (claims)
