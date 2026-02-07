@@ -1,16 +1,18 @@
 package com.linhdev.identityservice.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.linhdev.identityservice.dto.request.PermissionRequest;
 import com.linhdev.identityservice.dto.response.PermissionResponse;
 import com.linhdev.identityservice.entity.Permission;
 import com.linhdev.identityservice.mapper.PermissionMapper;
 import com.linhdev.identityservice.repository.PermissionRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

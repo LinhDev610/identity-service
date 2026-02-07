@@ -1,11 +1,12 @@
 package com.linhdev.identityservice.service;
 
-import com.linhdev.identityservice.dto.request.UserCreationRequest;
-import com.linhdev.identityservice.dto.response.UserResponse;
-import com.linhdev.identityservice.entity.User;
-import com.linhdev.identityservice.exception.AppException;
-import com.linhdev.identityservice.exception.ErrorCode;
-import com.linhdev.identityservice.repository.UserRepository;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,12 +15,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import java.time.LocalDate;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.linhdev.identityservice.dto.request.UserCreationRequest;
+import com.linhdev.identityservice.dto.response.UserResponse;
+import com.linhdev.identityservice.entity.User;
+import com.linhdev.identityservice.exception.AppException;
+import com.linhdev.identityservice.exception.ErrorCode;
+import com.linhdev.identityservice.repository.UserRepository;
 
 @SpringBootTest
 @TestPropertySource("/test.properties")
@@ -87,12 +88,9 @@ public class UserServiceTest {
         when(userRepository.existsByUsername(anyString())).thenReturn(true);
 
         // WHEN
-        var exception = assertThrows(AppException.class,
-                () -> userService.createUser(request));
+        var exception = assertThrows(AppException.class, () -> userService.createUser(request));
 
         // THEN
-        Assertions.assertThat(exception.getErrorCode().getCode())
-                .isEqualTo(ErrorCode.USER_EXISTED.getCode());
-
+        Assertions.assertThat(exception.getErrorCode().getCode()).isEqualTo(ErrorCode.USER_EXISTED.getCode());
     }
 }

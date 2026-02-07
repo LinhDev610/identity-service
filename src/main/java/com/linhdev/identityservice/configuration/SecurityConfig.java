@@ -20,11 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
-            "/users",
-            "/auth/token",
-            "/auth/introspect",
-            "/auth/logout",
-            "/auth/refresh",
+        "/users", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh",
     };
 
     // 2. Decode + verify token -> return Jwt (claims)
@@ -33,22 +29,23 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(request ->
-                request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
-                        .anyRequest().authenticated());
+        httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
+                .permitAll()
+                .anyRequest()
+                .authenticated());
 
         // httpSecurity.oauth2ResourceServer -> Đăng ký 1 Authentication Provider để support cho JWT
         // 1. filter trích xuất Bearer token từ header
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 // oauth2.jwt -> config cho jwt
                 // Nếu cấu hình với 1 resource server bên thứ 3, sử dụng jwtConfigurer.jwkSetUri -> done
-                // Nếu authenticate cho JWT của bản thân gen, sử dụng jwtConfigurer.decoder -> decode jwt token bản thân chèn
+                // Nếu authenticate cho JWT của bản thân gen, sử dụng jwtConfigurer.decoder -> decode jwt token bản thân
+                // chèn
                 // .decoder() là 1 interface -> cần define
-                oauth2.jwt(jwtConfigurer ->
-                        jwtConfigurer.decoder(customJwtDecoder)
+                oauth2.jwt(jwtConfigurer -> jwtConfigurer
+                                .decoder(customJwtDecoder)
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
-        );
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
 
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
 

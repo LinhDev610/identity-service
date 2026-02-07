@@ -1,25 +1,28 @@
 package com.linhdev.identityservice.controller;
 
+import java.util.List;
+
+import jakarta.validation.Valid;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
 import com.linhdev.identityservice.dto.request.ApiResponse;
 import com.linhdev.identityservice.dto.request.UserCreationRequest;
 import com.linhdev.identityservice.dto.request.UserUpdateRequest;
 import com.linhdev.identityservice.dto.response.UserResponse;
 import com.linhdev.identityservice.service.UserService;
-import jakarta.validation.Valid;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE,  makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
     UserService userService;
 
@@ -36,8 +39,7 @@ public class UserController {
 
         log.info("Username: {}", authentication.getName());
         // FOR_DEBUG
-        authentication.getAuthorities().forEach(
-                grantedAuthority -> log.info(grantedAuthority.getAuthority()));
+        authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
 
         return ApiResponse.<List<UserResponse>>builder()
                 .result(userService.getUsers())
@@ -68,8 +70,6 @@ public class UserController {
     @DeleteMapping("/{userId}")
     ApiResponse deleteUser(@PathVariable("userId") String userId) {
         userService.deleteUser(userId);
-        return ApiResponse.<String>builder()
-                .result("User has been deleted")
-                .build();
+        return ApiResponse.<String>builder().result("User has been deleted").build();
     }
 }

@@ -1,17 +1,19 @@
 package com.linhdev.identityservice.service;
 
+import java.util.HashSet;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.linhdev.identityservice.dto.request.RoleRequest;
 import com.linhdev.identityservice.dto.response.RoleResponse;
 import com.linhdev.identityservice.mapper.RoleMapper;
 import com.linhdev.identityservice.repository.PermissionRepository;
 import com.linhdev.identityservice.repository.RoleRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,10 +34,7 @@ public class RoleService {
     }
 
     public List<RoleResponse> getAll() {
-        return roleRepository.findAll()
-                .stream()
-                .map(roleMapper::toRoleResponse)
-                .toList();
+        return roleRepository.findAll().stream().map(roleMapper::toRoleResponse).toList();
     }
 
     public void delete(String roleName) {
