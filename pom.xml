@@ -181,6 +181,34 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- những phần k unit test, không cần jacoco -->
+                    <excludes>
+                        <exclude>com/linhdev/identityservice/dto/**</exclude>
+                        <exclude>com/linhdev/identityservice/entity/**</exclude>
+                        <exclude>com/linhdev/identityservice/mapper/**</exclude>
+                        <exclude>com/linhdev/identityservice/configuration/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
