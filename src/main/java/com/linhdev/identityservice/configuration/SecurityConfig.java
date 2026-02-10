@@ -12,6 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -30,28 +33,53 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) {
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
                 .permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**")
+                .permitAll() // Cho phép OPTIONS cho CORS preflight
                 .anyRequest()
                 .authenticated());
 
-        // httpSecurity.oauth2ResourceServer -> Đăng ký 1 Authentication Provider để support cho JWT
         // 1. filter trích xuất Bearer token từ header
+        // httpSecurity.oauth2ResourceServer
+        // -> Đăng ký 1 Authentication Provider để support cho JWT
         httpSecurity.oauth2ResourceServer(oauth2 ->
-                // oauth2.jwt -> config cho jwt
-                // Nếu cấu hình với 1 resource server bên thứ 3, sử dụng jwtConfigurer.jwkSetUri -> done
-                // Nếu authenticate cho JWT của bản thân gen, sử dụng jwtConfigurer.decoder -> decode jwt token bản thân
-                // chèn
-                // .decoder() là 1 interface -> cần define
+                // Nếu cấu hình với 1 resource server bên thứ 3, sử dụng jwtConfigurer.jwkSetUri
+                // -> done
+                // Nếu authenticate cho JWT của bản thân gen, sử dụng jwtConfigurer.decoder
+                // -> decode jwt token bản thân chèn
+
+                // oauth2.jwt: config cho jwt
                 oauth2.jwt(jwtConfigurer -> jwtConfigurer
                                 .decoder(customJwtDecoder)
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
 
+        // Bật CORS với cấu hình từ corsFilter bean
+        httpSecurity.cors(cors -> {});
+
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
 
         return httpSecurity.build();
+    }
+
+    @Bean
+    public CorsFilter corsFilter() {
+
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+
+        // Cấu hình CORS -> "soạn nội quy"
+        corsConfiguration.addAllowedOrigin(
+                "http://localhost:3000"); // Cho phép truy cập API này vào những trang web nào
+        corsConfiguration.addAllowedMethod("*"); // Cho phép method nào được gọi từ origin này
+        corsConfiguration.addAllowedHeader("*"); // Cho phép tất cả header được truy cập
+
+        // "Dán nội quy đó lên tất cả các cửa ra vào"
+        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
+        urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
+
+        return new CorsFilter(urlBasedCorsConfigurationSource);
     }
 
     @Bean
