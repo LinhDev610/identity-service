@@ -8,8 +8,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.linhdev.identityservice.constant.PredefinedAccount;
+import com.linhdev.identityservice.constant.PredefinedRole;
+import com.linhdev.identityservice.entity.Role;
 import com.linhdev.identityservice.entity.User;
-import com.linhdev.identityservice.enums.Role;
+import com.linhdev.identityservice.repository.RoleRepository;
 import com.linhdev.identityservice.repository.UserRepository;
 
 import lombok.AccessLevel;
@@ -30,22 +33,36 @@ public class ApplicationInitConfig {
             prefix = "spring",
             value = "datasource.driverClassName",
             havingValue = "com.mysql.cj.jdbc.Driver")
-    ApplicationRunner applicationRunner(UserRepository userRepository) {
-        log.info("Init Application Config...");
+    ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
+        log.info("Initializing Application...");
+        String adminUsername = PredefinedAccount.ADMIN_USERNAME;
+        String adminPassword = PredefinedAccount.ADMIN_PASSWORD;
+
         return args -> {
-            if (userRepository.findByUsername("admin").isEmpty()) {
-                var roles = new HashSet<String>();
-                roles.add(Role.ADMIN.name());
+            if (userRepository.findByUsername(adminUsername).isEmpty()) {
+                roleRepository.save(Role.builder()
+                        .name(PredefinedRole.USER_ROLE)
+                        .description("User role")
+                        .build());
+
+                Role adminRole = roleRepository.save(Role.builder()
+                        .name(PredefinedRole.ADMIN_ROLE)
+                        .description("Admin role")
+                        .build());
+
+                var roles = new HashSet<Role>();
+                roles.add(adminRole);
 
                 User user = User.builder()
-                        .username("admin")
-                        .password(passwordEncoder.encode("admin"))
-                        // .roles(roles)
+                        .username(adminUsername)
+                        .password(passwordEncoder.encode(adminPassword))
+                        .roles(roles)
                         .build();
 
                 userRepository.save(user);
                 log.warn("admin user has been created with default password: admin, please change it");
             }
+            log.info("Application initialized completed ....");
         };
     }
 }
