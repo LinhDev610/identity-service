@@ -3,7 +3,7 @@ server:
   port: 8080
   servlet:
     # Khi trong he_thong co nhieu microservice, giup dinh vi microservice va giup co 1 lot balancer giup routing request den dung microservice
-    context-path: /identiy_service
+    context-path: /identity_service
 
 spring:
   datasource:
