@@ -1,4 +1,4 @@
-DBMS_CONNECTION=jdbc:mysql://localhost:3306/identity_service;JWT_SIGNERKEY=0dd68e41c5ccb2782f73a95c5749264fcb25910d8b623f0512ce4dddf164a1c3;DBMS_USERNAME=root;DBMS_PASSWORD=root
+BREVO_API_KEY=your_brevo_api_key_here;BREVO_EMAIL=your_email@gmail.com;DB_URL=jdbc:mysql://localhost:3306/identity_service;DBMS_PASSWORD=root;DBMS_USERNAME=root;JWT_SIGNERKEY=your_jwt_signer_key_here;SECRET_KEY=your_secret_key_here
 
 build .jar and target:
 1. mvn package -DskipTests
