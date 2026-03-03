@@ -1,4 +1,4 @@
-BREVO_API_KEY=your_brevo_api_key_here;BREVO_EMAIL=your_email@gmail.com;DB_URL=jdbc:mysql://localhost:3306/identity_service;DBMS_PASSWORD=root;DBMS_USERNAME=root;JWT_SIGNERKEY=your_jwt_signer_key_here;SECRET_KEY=your_secret_key_here
+BREVO_API_KEY=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;BREVO_EMAIL=vu4002@gmail.com;DB_URL=jdbc:mysql://localhost:3306/identity_service;DBMS_PASSWORD=root;DBMS_USERNAME=root;JWT_SIGNERKEY=sc0YbTdiDmYOMA40iBkUujJw7Oec0hBHO4bKSeCH+1kPlCLu0ZGWz5vGt//Npqhs;SECRET_KEY=d31e4b1464c3bf21004d646c0fb74021eb9d3e0c0aab23fb9034528663a0c029
 
 build .jar and target:
 1. mvn package -DskipTests
